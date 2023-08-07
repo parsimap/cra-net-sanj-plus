@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@fontsource/quicksand": "^4.5.11",
+    "@mui/icons-material": "^5.10.14",
+    "@mui/material": "^5.12.3",
+    "@parsimap/mui-persistent-drawer": "^1.1.5",
+    "@parsimap/react-mapbox-gl": "^1.4.4",
+    "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -10,26 +18,24 @@
     "@types/node": "^16.18.39",
     "@types/react": "^18.2.17",
     "@types/react-dom": "^18.2.7",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
-    "@fontsource/quicksand": "^4.5.11",
-    "@mui/icons-material": "^5.10.14",
-    "@mui/material": "^5.12.3",
-    "@parsimap/mui-persistent-drawer": "^1.0.5",
-    "@parsimap/react-mapbox-gl": "^1.4.0",
-    "@reduxjs/toolkit": "^1.9.5",
     "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/parser": "^6.1.0",
     "mapbox-gl": "^1.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-redux": "^8.1.0",
     "react-router-dom": "^6.11.1",
+    "react-scripts": "5.0.1",
+    "stylis-plugin-rtl": "^2.1.1",
+    "typescript": "^4.9.5",
     "vazir-font": "^30.1.0",
-    "vazirmatn": "^33.0.3"
+    "vazirmatn": "^33.0.3",
+    "web-vitals": "^2.1.4",
+    "@types/mapbox-gl": "^2.7.11",
+    "recharts": "^2.7.2",
+    "formik": "^2.4.3",
+    "yup": "^1.2.0",
+    "@mui/x-data-grid": "^6.11.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -54,5 +60,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/stylis": "^4.0.2",
+    "@types/yup": "^0.32.0"
   }
 }
