@@ -1,8 +1,8 @@
-@import "~vazirmatn/misc/UI/Vazirmatn-UI-font-face.css";
+@import "~vazirmatn/misc/UI-Farsi-Digits/Vazirmatn-UI-FD-font-face.css";
 
 * {
     box-sizing: border-box;
-    font-family: 'Vazirmatn UI', sans-serif !important;
+    font-family: 'Vazirmatn UI FD', sans-serif !important;
 }
 
 html {
@@ -26,10 +26,36 @@ body {
     direction: rtl;
 }
 
-.recharts-legend-wrapper{
+.recharts-legend-wrapper {
     padding-top: 1rem;
 }
 
 tspan {
     font-size: 0.7rem;
+}
+
+
+textarea {
+    padding: 8.5px 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+}
+
+textarea::placeholder {
+    font-size: 0.9rem;
+}
+
+textarea:hover {
+    border: 1px solid rgba(0, 0, 0, 0.65);
+}
+
+textarea:focus, textarea:focus:hover {
+    border: 2px #1976d2 solid;
+}
+
+textarea:focus {
+    outline: none;
+}
+.tss-1cdcmys-MUIDataTable-responsiveBase{
+    position: unset !important;
 }

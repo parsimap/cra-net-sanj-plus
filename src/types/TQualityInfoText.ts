@@ -1,0 +1,1 @@
+export type TQualityInfoText = "ضعیف" | "متوسط" | "خوب";

@@ -1,0 +1,1 @@
+export type TQualityStatusMapKeys = "-1" | "1" | "2" | "3";

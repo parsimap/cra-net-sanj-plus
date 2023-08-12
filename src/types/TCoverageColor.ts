@@ -1,0 +1,1 @@
+export type TCoverageColor = "#000000" | "#FF0000" | "#008000" | "#FFC300";

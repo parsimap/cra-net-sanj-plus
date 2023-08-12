@@ -1,0 +1,1 @@
+export type TQualityColor = "#FF0000" | "#008000" | "#FFC300";

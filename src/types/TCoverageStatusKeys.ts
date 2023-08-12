@@ -1,0 +1,1 @@
+export type TCoverageStatusKeys = "0" | "1" | "2" | "3";

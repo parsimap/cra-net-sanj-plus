@@ -1,0 +1,1 @@
+export type TGeneration = "2G" | "3G" | "4G";

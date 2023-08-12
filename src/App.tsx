@@ -1,6 +1,6 @@
 import ThemeWrapper from "./Components/RTLprovider/ThemeWrapper";
 import { Provider } from "react-redux";
-import { store } from "./store/store";
+import { store } from "./app/store";
 import { RouterProvider } from "react-router-dom";
 import { Router } from "./Router";
 
