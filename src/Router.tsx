@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import VerifyUserInfo from "./Components/VerifyUserInfo";
-import Redirect from "./Components/Redirect";
 import MapView from "./Components/MapView";
 
 export const Router = createBrowserRouter([
@@ -11,9 +10,10 @@ export const Router = createBrowserRouter([
   {
     path: "/home",
     element: <MapView />,
+    children: [{ path: "/home/edit", element: <MapView /> }]
   },
   {
     path: "*",
-    element: <Redirect path={"/userinfo"} />
+    element: <VerifyUserInfo />
   }
 ]);

@@ -3,38 +3,13 @@ import { useEffect, useState } from "react";
 import { REGIONAL_CODE_MAP } from "../Components/Pricing/pricing.constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
-import { useTokenQueryWrapper } from "./useTokenQueryWrapper";
 import { useAreaInfoQuery } from "../features/craApiSlice";
-
-type TServiceType = "fixed" | "mobile";
-
-interface IUsePricingQueryProps {
-  serviceType: TServiceType;
-}
-
-type TpricingProps = {
-  serviceId: number,
-  operatorId: number,
-  provinceCode: string,
-  countyCode: string,
-  cityCode: string
-}
+import { IUsePricingQueryProps } from "../interfaces/IUsePricingQueryProps";
+import { IPricingProps } from "../interfaces/IPricingProps";
+import { IPriceListResult } from "../interfaces/IPriceListResult";
 
 
-type Tresult = {
-  "tariffName": string,
-  "planType": string,
-  "geoLimit": string,
-  "serviceName": string,
-  "tariff": string,
-  "nerkhbit": string,
-  "hajm": string,
-  "limitPack": string,
-  "validationLink": string,
-  simCart: string
-}[]
-
-const initialPropsState = {
+const initialPropsState: IPricingProps = {
   cityCode: "-1",
   countyCode: "-1",
   provinceCode: "-1",
@@ -42,7 +17,7 @@ const initialPropsState = {
   serviceId: -1
 };
 
-const initialResultState: Tresult = [{
+const initialResultState: IPriceListResult[] = [{
   tariffName: "",
   planType: "",
   geoLimit: "",
@@ -53,18 +28,21 @@ const initialResultState: Tresult = [{
   limitPack: "",
   validationLink: "",
   simCart: ""
+
 }];
 
 export const usePricingQuery = ({ serviceType }: IUsePricingQueryProps) => {
 
-  const [pricingProps, setPricingProps] = useState<TpricingProps>(initialPropsState);
+  const [pricingProps, setPricingProps] = useState<IPricingProps>(initialPropsState);
 
 
   const appState = useSelector((state: RootState) => state.app);
 
-  const { userLocationCoordinates: { lng, lat }, operator } = appState;
+  const { operator } = appState;
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
 
-  const token = useTokenQueryWrapper();
+
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const areaInfo = useAreaInfoQuery({
     lat, lng, zoom: 0, code: 1, apiKey: token
@@ -75,7 +53,7 @@ export const usePricingQuery = ({ serviceType }: IUsePricingQueryProps) => {
   const [triggerOtherPricing, { data: otherData, isLoading: isOtherLoading }] = useLazyOtherPricingListQuery();
 
 
-  const [pricing, setPricing] = useState<Tresult>(initialResultState);
+  const [pricing, setPricing] = useState<IPriceListResult[]>(initialResultState);
 
 
   useEffect(() => {
@@ -107,7 +85,7 @@ export const usePricingQuery = ({ serviceType }: IUsePricingQueryProps) => {
           newPricingProps[region] = item.code;
         }
       }
-      setPricingProps(newPricingProps as TpricingProps);
+      setPricingProps(newPricingProps as unknown as IPricingProps);
     }
   }, [areaInfo, operator]);
 

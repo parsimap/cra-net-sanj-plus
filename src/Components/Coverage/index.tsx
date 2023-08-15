@@ -2,36 +2,43 @@ import { Divider, Paper, Stack, Typography } from "@mui/material";
 import { BubbleChartRounded, ErrorRounded, SignalCellularAltRounded } from "@mui/icons-material";
 
 import TitleWithIcon from "../TitleWithIcon";
-
-import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { useCraDriveTestQuery } from "../../features/craApiSlice";
 
 import { COVERAGE_STATUS } from "./coverage.constants";
-import { getOperatorCode } from "./coverage.common";
+
 import { TIcon } from "../../types/TIcon";
 import { TCoverageStatusKeys } from "../../types/TCoverageStatusKeys";
-
-
+import { ICoverageStatusValues } from "../../interfaces/ICoverageStatusValues";
 
 import CoverageCharts from "./CoverageCharts";
 import CoverageChartsRegional from "./CoverageChartsRegional";
-import { ICoverageStatusValues } from "../../interfaces/ICoverageStatusValues";
 
+import { getOperatorCode } from "../../common/getOperatorCode";
+
+
+/**
+ * adds unit to the current signal value and returns it. handling this inside jsx may be tricky due to the direction problems
+ * @param signalValue raw signal value
+ */
+function adjustSignalValue(signalValue: string) {
+  const sv = signalValue.replace("-", "");
+  const UNIT = " دسی بل";
+  return sv + "-" + UNIT;
+}
 
 function Coverage() {
-  const token = useTokenQueryWrapper();
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const {
-    userLocationCoordinates: {
-      lat, lng
-    }, operator
+    operator, generation
   } = useSelector((state: RootState) => state.app);
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
 
 
   const info = useCraDriveTestQuery({
-    lat, lng, apiKey: token, operatorCode: getOperatorCode(operator!.id, "4G")     // TODO: generation should be set dynamically
+    lat, lng, apiKey: token, operatorCode: getOperatorCode(operator!.id, generation!)
   });
 
   /**
@@ -44,20 +51,10 @@ function Coverage() {
 
   /**
    * returns the value of a given property in the current coverage status
-   * @param property is among the properties that describe each individual coverage status ~ keyof TcoverageStatusValues
+   * @param property is among the properties that describe each individual coverage status ~ keyof ICoverageStatusValues
    */
   function getSignalStatusProperty(property: keyof ICoverageStatusValues) {
     return getCurrentStatus()[property];
-  }
-
-  /**
-   * adds unit to the current signal value and returns it. handling this inside jsx may be tricky due to the direction problems
-   * @param signalValue raw signal value
-   */
-  function adjustSignalValue(signalValue: string) {
-    const sv = signalValue.replace("-", "");
-    const UNIT = " دسی بل";
-    return sv + "-" + UNIT;
   }
 
 

@@ -4,19 +4,17 @@ import { useSelector } from "react-redux";
 
 import { QueryStatus } from "@reduxjs/toolkit/query";
 import { useCraDriveTestQuery } from "../features/craApiSlice";
-import { useTokenQueryWrapper } from "./useTokenQueryWrapper";
 
 import { RootState } from "../app/store";
 
 import { OPERATOR_CATALOG } from "../common/constants";
 import { ICraDriveTestResult } from "../interfaces/ICraDriveTestResult";
+import { IUseAlCraDriveTestsProps } from "../interfaces/IUseAlCraDriveTestsProps";
+import { IExtendedOperatorCoverageReport } from "../interfaces/IExtendedOperatorCoverageReport";
+import { TOperatorsName } from "../types/TOperatorsName";
 
-interface IuseAlCraDriveTests {
-  negateSignalValues: boolean;
-}
 
-
-const initialValues: IextendedOperatorCoverageReport = {
+const initialValues: IExtendedOperatorCoverageReport = {
   status: "",
   status_code: -1,
   city_range: -1,
@@ -25,16 +23,6 @@ const initialValues: IextendedOperatorCoverageReport = {
   signal_value: -1,
   name: ""
 };
-
-/**
- * we need the `IextendedOperatorCoverageReport` interface since we may want to modify the `signal_value` property
- */
-interface IextendedOperatorCoverageReport extends Omit<ICraDriveTestResult, "signal_value"> {
-  signal_value: number;
-}
-
-
-type ToperatorsName = "mci" | "mtn" | "rightell";
 
 
 /**
@@ -59,33 +47,28 @@ function getNewState(negateSignalValues: boolean, data: Omit<ICraDriveTestResult
  * @param negateSignalValues `signal_value` is a negative value and can lead to issues while plotting the data; this parameter sets whether to negate the `signal_value`
  * returns an object with two properties; `isLoading` which indicates whether data is ready to be used or not, `result` which is an array consisting of the coverage reports of different operators
  */
-export const useAllCraDriveTests = ({ negateSignalValues }: IuseAlCraDriveTests) => {
-  const token = useTokenQueryWrapper();
+export const useAllCraDriveTests = ({ negateSignalValues }: IUseAlCraDriveTestsProps) => {
+  const token = useSelector((state: RootState) => state.auth.token);
   const { generation } = useSelector((state: RootState) => state.app);
 
   /**
    * this state holds the coverage report object for each operator
    */
-  const [result, setResult] = useState<{ [_ in ToperatorsName]: IextendedOperatorCoverageReport }>({
+  const [result, setResult] = useState<Record<TOperatorsName, IExtendedOperatorCoverageReport>>({
     mci: initialValues,
     mtn: initialValues,
     rightell: initialValues
   });
 
-  const {
-    userLocationCoordinates: {
-      lat, lng
-    }
-  } = useSelector((state: RootState) => state.app);
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
 
 
   /**
-   * finds the operator code of a specific operator. note that operator code depends both on operator and generation(TODO)
+   * finds the operator code of a specific operator. note that operator code depends both on operator and generation
    */
   function getOperatorCodes() {
     const operatorIDs: number[] = [];
     const operatorCodes: number[] = [];
-    // TODO: generation should be dynamically chosen
     for (const op of OPERATOR_CATALOG)
       if (!operatorIDs.includes(op.operatorId) && op.generation === generation) {
         operatorCodes.push(op.operatorCode);
@@ -94,9 +77,6 @@ export const useAllCraDriveTests = ({ negateSignalValues }: IuseAlCraDriveTests)
     return operatorCodes;
   }
 
-  /**
-   * should be dependent of genereation(TODO)
-   */
   const operatorCodes = useMemo(getOperatorCodes, [generation]);
 
   const mci = useCraDriveTestQuery({
@@ -109,7 +89,7 @@ export const useAllCraDriveTests = ({ negateSignalValues }: IuseAlCraDriveTests)
     lat, lng, apiKey: token, operatorCode: operatorCodes[2]
   });
 
-
+  // console.log(mci);
   /**
    * the following effects are responsible for setting the data fetched from network for each operator
    */

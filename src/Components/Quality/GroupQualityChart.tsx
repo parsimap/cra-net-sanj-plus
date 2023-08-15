@@ -35,6 +35,18 @@ const legendMap = {
   "#008000": "خوب"
 };
 
+
+/**
+ * returns the color for the chart cell based on the provided metric
+ * @param val the value which the color is set upon
+ */
+function getColor(val: number): TQualityColor {
+  if (val === 3) return "#FF0000";
+  else if (val === 2) return "#FFC300";
+  else return "#008000";
+}
+
+
 function GroupQualityChart({ provinceId, serviceId }: IGroupQualityChartProps) {
   /**
    * holds the current category in which the internet quality is plotted
@@ -47,7 +59,7 @@ function GroupQualityChart({ provinceId, serviceId }: IGroupQualityChartProps) {
   const [chartData, setChartData] = useState<IChartData[]>([]);
 
   const info = useRankingInfoQuery({ serviceId, provinceId, category });
-  console.log(info);
+
   /**
    * this effect is responsible for saving only the necessary information fetched from network in `chartData` and discarding the unused properties
    */
@@ -64,7 +76,7 @@ function GroupQualityChart({ provinceId, serviceId }: IGroupQualityChartProps) {
     }
   }, [info]);
 
-
+  // TODO: functions
   /**
    * returns the ranking of the given operator to show in the tooltip
    * @param name name of the target operator
@@ -73,17 +85,6 @@ function GroupQualityChart({ provinceId, serviceId }: IGroupQualityChartProps) {
     if (!name) return "";
     return chartData.find(item => item.name === name)!.ranking;
   }
-
-  /**
-   * returns the color for the chart cell based on the provided metric
-   * @param val the value which the color is set upon
-   */
-  function getColor(val: number): TQualityColor {
-    if (val === 3) return "#FF0000";
-    else if (val === 2) return "#FFC300";
-    else return "#008000";
-  }
-
 
   return <>
     <Paper elevation={4}>

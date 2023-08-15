@@ -7,18 +7,18 @@ import Drawer from "../Drawer";
 
 import { RootState } from "../../app/store";
 
+
 function MapView() {
 
   /**
    * dataReady state is used to avoid unnecessary render of MapView component in case users' data has not been retrieved
    */
   const [dataReady, setDataReady] = useState(false);
+  const appState = useSelector((state: RootState) => state.app);
 
   const navigate = useNavigate();
 
-  const appState = useSelector((state: RootState) => state.app);
-
-
+  // TODO: bad UX
   useEffect(() => {
     if (!appState.service) {
       navigate("/userinfo");
@@ -26,7 +26,6 @@ function MapView() {
       setDataReady(true);
     }
   }, [appState, navigate]);
-
 
   return <>
 

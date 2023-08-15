@@ -1,17 +1,21 @@
+import React, { useEffect, useState } from "react";
+
+import * as yup from "yup";
+import { useFormik } from "formik";
+
 import { Button, IconButton, InputAdornment, inputLabelClasses, Paper, Rating, Stack, Typography } from "@mui/material";
 import Redo from "@mui/icons-material/RefreshRounded";
 import Save from "@mui/icons-material/SaveRounded";
 import Close from "@mui/icons-material/CloseRounded";
 import TextField from "@mui/material/TextField";
+
 import { useLazyCaptchaQuery } from "../../features/captchaSlice";
-import React, { useEffect, useState } from "react";
-import * as yup from "yup";
-import { useFormik } from "formik";
+
 import { IFeedbackForm } from "../../interfaces/IFeedbackForm";
 import { IFeedbackProps } from "../../interfaces/IFeedbackProps";
 
-
-const phoneRegExp = /09(1[0-9]|3[1-9])[0-9]{7}/;
+// TODO : ask about the regex
+const phoneRegExp = /09([0-9][0-9]|3[1-9])[0-9]{7}/;
 
 
 const validationSchema = yup.object({
@@ -31,6 +35,10 @@ const initialValues: IFeedbackForm = {
 
 function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
   const [trigger, { data }] = useLazyCaptchaQuery();
+
+  /**
+   * this state hols the captcha information fetched from network
+   */
   const [captcha, setCaptcha] = useState<{ url: string, key: number }>();
 
   const formik = useFormik({
@@ -42,10 +50,12 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
 
   useEffect(() => {
     trigger({});
-
   }, [trigger]);
 
 
+  /**
+   * this effect creates an image from the captcha array fetched from network
+   */
   useEffect(() => {
     if (data) {
       const blob = new Blob([new Uint8Array(data.imageData)], {
@@ -57,28 +67,23 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
   }, [data]);
 
 
-  function handleSubmit() {
+  function handleSubmit() { //TODO: ask about the submit
     console.log(formik.values);
   }
 
 
   return <>
-
-
     <Paper elevation={4} sx={{
       p: 2, overflow: "overflow", position: "relative", [`.${inputLabelClasses.root}`]: {
         fontSize: "0.9rem"
       }
     }}>
-      {/*<Stack direction={"row"} justifyContent={"flex-start"} spacing={12}>*/}
       <Typography sx={{ position: "absolute", top: 15, left: 15 }}>
         <IconButton onClick={() => setFeedbackDialogOpen(false)}>
           <Close />
         </IconButton>
       </Typography>
       <Typography sx={{ fontSize: "1.2rem", fontWeight: 800, textAlign: "center", mb: 2 }}>ثبت بازخورد</Typography>
-      {/*</Stack>*/}
-
       <form onSubmit={formik.handleSubmit}>
         <Stack direction={"column"} spacing={2}>
           <Typography>
@@ -141,17 +146,6 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
                            </InputAdornment>
                          }}
               />
-              {/*<Stack direction={"row"} alignItems={"center"}>*/}
-              {/*  <Typography component={"img"} alt={"captcha image"}*/}
-              {/*              src={captcha ? captcha.url : ""}></Typography>*/}
-              {/*  <Typography component={"div"}>*/}
-              {/*    <Stack direction={"row"} alignItems={"center"} justifyContent={"center"}>*/}
-              {/*      <IconButton onClick={() => trigger({})}>*/}
-              {/*        <Redo />*/}
-              {/*      </IconButton>*/}
-              {/*    </Stack>*/}
-              {/*  </Typography>*/}
-              {/*</Stack>*/}
             </Stack>
           </Typography>
           <Typography>
@@ -169,7 +163,6 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
         </Stack>
       </form>
     </Paper>
-
   </>;
 }
 

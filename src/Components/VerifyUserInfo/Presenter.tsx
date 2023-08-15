@@ -9,6 +9,9 @@ import {
   Typography,
   typographyClasses
 } from "@mui/material";
+import Edit from "@mui/icons-material/EditNoteRounded";
+import Confirm from "@mui/icons-material/BeenhereRounded";
+
 import { IVerifyInfoPresenterProps } from "../../interfaces/IVerifyInfoPresenterProps";
 
 
@@ -48,8 +51,14 @@ function VerifyUserInfo({
             </Stack>
             <Stack direction={"column"} spacing={2} sx={{ p: 2 }}>
               <Stack direction={"row"} justifyContent={"space-around"}>
-                <Button onClick={() => navigate("/home")} variant={"contained"}> تایید و ادامه</Button>
-                <Button variant={"outlined"}>ویرایش</Button>
+                <Button onClick={() => navigate("/home")} variant={"contained"}>
+                  <Confirm sx={{ fontSize: "1.2rem" }} />
+                  تایید و ادامه
+                </Button>
+                <Button onClick={() => navigate("/home/edit")} variant={"outlined"}>
+                  <Edit />
+                  ویرایش
+                </Button>
               </Stack>
               <Typography sx={{ fontSize: "0.8rem", textAlign: "justify", color: "#999" }}>
                 در صورتیکه مشخصات ارائه شده با اطلاعات سرویس اینترنت شما مطابقت

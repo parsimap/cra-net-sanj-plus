@@ -1,12 +1,10 @@
-import IApiStatus from "./IApiStatus";
-
 interface IProvince {
   Id: string;
   ProvinceName: string;
   TotalCalcHome: number;
 }
 
-interface IOperator {
+export interface IOperator {
   Id: string;
   OperatorName: string;
   BrandName: string;
@@ -30,7 +28,7 @@ export interface IIndicatorPalette {
   Palette: any;
 }
 
-interface IResult {
+export interface IGetBaseResultObject {
   Provinces: IProvince[];
   Operators: IOperator[];
   YearMonth: IYearMonth[];
@@ -40,5 +38,12 @@ interface IResult {
   CoveragesPalette: IIndicatorPalette;
 }
 
-export default interface IGetBaseResult extends IApiStatus<IResult> {
+export default interface IGetBaseResult {
+  ResultObject: IGetBaseResultObject
+  Result_ErrorMessage: string
+  Result_HasError: boolean
+  StatusCode: number
+  TransactionDate: string,
+  TransactionId: string,
+  ErrorCode: string
 }

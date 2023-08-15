@@ -4,4 +4,5 @@ export interface IToolbarProps {
     handleZoomOut: Function | undefined,
     getZoom: Function | undefined,
   };
+  mapReady: boolean;
 }

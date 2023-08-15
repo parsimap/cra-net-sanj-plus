@@ -6,6 +6,16 @@ import { IOperatorStatus as IOperatorStatusQuery } from "../interfaces/IOperator
 import { IOperatorStatusResult } from "../interfaces/IOperatorStatusResult";
 import { IReportTimeResult } from "../interfaces/IReportTimeResult";
 import { IRankingInfoQuery } from "../interfaces/IRankingInfoQuery";
+import { IRankingInfoResult } from "../interfaces/IRankingInfoResult";
+import { IComplaintCountQuery } from "../interfaces/IComplaintCountQuery";
+import { IComplaintCountRankQuery } from "../interfaces/IComplaintCountRankQuery";
+import { IComplaintCountRankResult } from "../interfaces/IComplaintCountRankResult";
+import { IComplaintRankQuery } from "../interfaces/IComplaintRankQuery";
+import { IComplaintRankResult } from "../interfaces/IComplaintRankResult";
+import { IPriceListResult } from "../interfaces/IPriceListResult";
+import { IPriceListQuery } from "../interfaces/IPriceListQuery";
+import { IComplaintDetailQuery } from "../interfaces/IComplaintDetailQuery";
+import { IComplaintDetailResult } from "../interfaces/IComplaintDetailResult";
 
 
 export const craHostServiceApiSlice = createApi({
@@ -25,121 +35,52 @@ export const craHostServiceApiSlice = createApi({
       })
     }),
     reportTime: builder.query<IReportTimeResult[], {}>({
-      query: (query) => ({
+      query: () => ({
         url: `/getreporttimefaradid`
       })
     }),
-    rankingInfo: builder.query<any, IRankingInfoQuery>({
-      query: (query) => ({
-        url: `/ranking/${query.serviceId}/${query.provinceId}/${query.category}`
+    rankingInfo: builder.query<IRankingInfoResult[], IRankingInfoQuery>({
+      query: ({ serviceId, provinceId, category }) => ({
+        url: `/ranking/${serviceId}/${provinceId}/${category}`
       })
     }),
-    reportTimeComplaint: builder.query<any, any>({
-      query: (query) => ({
+    reportTimeComplaint: builder.query<IReportTimeResult[], {}>({
+      query: () => ({
         url: `/getreporttimecomplaint`
       })
     }),
-    complaintCount: builder.query<ICommonComplaintsTabularInfo[], {
-      serviceId: number,
-      provinceId: string,
-      operatorId: number
-    }>({
-      query: (query) => ({
-        url: `/complaintcount/${query.serviceId}/${query.provinceId}/${query.operatorId}`
+    complaintCount: builder.query<ICommonComplaintsTabularInfo[], IComplaintCountQuery>({
+      query: ({ serviceId, operatorId, provinceId }) => ({
+        url: `/complaintcount/${serviceId}/${provinceId}/${operatorId}`
       })
     }),
-    complaintCountRank: builder.query<{
-      operatorId: number,
-      countComplaint: number
-    }[], {
-      serviceId: number,
-      provinceId: string,
-      subjectId: number
-    }>({
-      query: (query) => ({
-        url: `/complaintcountrank/${query.serviceId}/${query.provinceId}/${query.subjectId}`
+    complaintCountRank: builder.query<IComplaintCountRankResult[], IComplaintCountRankQuery>({
+      query: ({ serviceId, provinceId, subjectId }) => ({
+        url: `/complaintcountrank/${serviceId}/${provinceId}/${subjectId}`
       })
     }),
-    complaintRank: builder.query<{
-      operatorId: number,
-      countComplaint: number
-    }[], {
-      serviceId: number,
-      provinceId: string,
-      subjectId: number
-    }>({
-      query: (query) => ({
-        url: `/complaintrank/${query.serviceId}/${query.provinceId}/${query.subjectId}`
+    complaintRank: builder.query<IComplaintRankResult[], IComplaintRankQuery>({
+      query: ({ serviceId, provinceId, subjectId }) => ({
+        url: `/complaintrank/${serviceId}/${provinceId}/${subjectId}`
       })
     }),
-    fixedPricingList: builder.query<
-      {
-        "tariffName": string,
-        "planType": string,
-        "geoLimit": string,
-        "serviceName": string,
-        "tariff": string,
-        "nerkhbit": string,
-        "hajm": string,
-        "limitPack": string,
-        "validationLink": string,
-        simCart: string
-      }[]
-      , {
-      serviceId: number,
-      provinceCode: string,
-      operatorId: number,
-      countyCode: string,
-      cityCode: string
-    }>({
-      query: (query) => ({
-        url: `/tariffsabetlist/${query.serviceId}/${query.provinceCode}/${query.operatorId}/${query.countyCode}/${query.cityCode}`
+    fixedPricingList: builder.query<IPriceListResult[], IPriceListQuery>({
+      query: ({ serviceId, operatorId, cityCode, provinceCode, countyCode }) => ({
+        url: `/tariffsabetlist/${serviceId}/${provinceCode}/${operatorId}/${countyCode}/${cityCode}`
       })
     }),
-    otherPricingList: builder.query<{
-      "tariffName": string,
-      "planType": string,
-      "geoLimit": string,
-      "serviceName": string,
-      "tariff": string,
-      "nerkhbit": string,
-      "hajm": string,
-      "limitPack": string,
-      "validationLink": string,
-      "simCart": string
-    }[], {
-      serviceId: number,
-      provinceCode: string,
-      operatorId: number,
-      countyCode: string,
-      cityCode: string
-    }>({
-      query: (query) => ({
-        url: `/tariffsayarlist/${query.serviceId}/${query.provinceCode}/${query.operatorId}/${query.countyCode}/${query.cityCode}`
+    otherPricingList: builder.query<IPriceListResult[], IPriceListQuery>({
+      query: ({ serviceId, operatorId, cityCode, provinceCode, countyCode }) => ({
+        url: `/tariffsayarlist/${serviceId}/${provinceCode}/${operatorId}/${countyCode}/${cityCode}`
       })
     }),
-    complaintDetail: builder.query<ComplaintDetailResultType, IComplaintDetailQuery>({
+    complaintDetail: builder.query<IComplaintDetailResult[], IComplaintDetailQuery>({
       query: ({ provinceId, operatorId }) => `/complaintdetail/${operatorId}/${provinceId}`
     })
   })
 });
 
-interface IComplaintDetailQuery {
-  provinceId: string;
-  operatorId: string;
-}
 
-export interface IComplaintDetailResultItem {
-  date: string;
-  service: string;
-  complaintType: string;
-  complaintSubject: string;
-  comId: number;
-  lat: number;
-  long: number;
-}
-
-type ComplaintDetailResultType = IComplaintDetailResultItem[]
 export const {
   useOperatorListQuery,
   useOperatorStatusQuery,

@@ -26,12 +26,9 @@ function ProviderInfoWrapper({ state }: IProviderInfoWrapperProps) {
   }
 
   return <>
-
     <Suspense fallback={<Skeleton />}>
       {getCurrentComponent()}
     </Suspense>
-
-
   </>;
 }
 

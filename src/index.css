@@ -17,6 +17,9 @@ body {
     padding: 0
 }
 
+/**
+styles for chart component(recharts)
+ */
 
 .recharts-wrapper {
     direction: ltr;
@@ -34,7 +37,9 @@ tspan {
     font-size: 0.7rem;
 }
 
-
+/**
+styles for feedback textarea
+ */
 textarea {
     padding: 8.5px 14px;
     border-radius: 4px;
@@ -56,6 +61,96 @@ textarea:focus, textarea:focus:hover {
 textarea:focus {
     outline: none;
 }
-.tss-1cdcmys-MUIDataTable-responsiveBase{
+
+/**
+styles for datatable
+ */
+.tss-1cdcmys-MUIDataTable-responsiveBase {
     position: unset !important;
+}
+
+/**
+styles for map attribution
+ */
+.mapboxgl-ctrl-bottom-right {
+    left: 0;
+    right: unset !important;
+}
+
+/**
+styles for complaints popup
+ */
+.complaints-popup-wrapper{
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 200px;
+}
+
+.complaints-popup-grid-item{
+    display: grid;
+    grid-template-columns: 30% 70%;
+}
+
+.complaints-popup-title{
+    font-weight: 300;
+}
+
+.complaints-popup-content{
+    font-weight: 600;
+}
+
+.complaints-popup-header{
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    z-index: 11;
+}
+
+
+.complaints-popup-header::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 30%;
+    background: #ddd;
+    z-index: -10;
+}
+
+.mapboxgl-popup-close-button{
+    font-size: 1rem;
+    font-weight: 700;
+    z-index: 11;
+}
+
+
+/**
+styles for marker
+ */
+.search-result-marker {
+    width: 25px;
+    height: 39.5px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 474' preserveAspectRatio='xMinYMid'%3E%3Cpath d='M300 150c0 20-11 57-29 88-17 31-68 97-82 132s-28 66-30 83l-6 17-3 4s-3-1-4-4l-4-16c-4-18-17-50-30-85-14-35-71-104-88-134-20-34-24-65-24-85a150 150 0 01300 0z' fill='%23cc3433'/%3E%3Ccircle cx='151.5' cy='152.7' r='56.2' fill='%23faa' stroke='%239c3433' stroke-width='7.2'/%3E%3C/svg%3E");
+}
+
+.search-result-marker {
+    animation: 0.3s pulsate;
+}
+
+@keyframes pulsate {
+    0% {
+        height: 0;
+        width: 0;
+    }
+
+    100% {
+        width: 25px;
+        height: 39.5px;
+    }
 }

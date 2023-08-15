@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-import {
-  useComplaintCountRankQuery,
-  useComplaintRankQuery
-} from "../../features/craHostServiceApiSlice";
+import { useGetBaseDataQuery } from "../../features/fttxApiSlice";
+import { useComplaintCountRankQuery, useComplaintRankQuery } from "../../features/craHostServiceApiSlice";
 import { RootState } from "../../app/store";
 
 
@@ -14,34 +12,50 @@ import Topic from "@mui/icons-material/ForumRounded";
 
 import TitleWithIcon from "../TitleWithIcon";
 
-import { OPERATOR_MAP } from "../../common/constants";
 
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 
 import { IComplaintsChartsWrapperProps } from "../../interfaces/IComplaintsChartsWrapperProps";
+import { IOperator } from "../../interfaces/IGetBaseResult";
 
 
+/**
+ * uses the operator info object to find the short name(brand name) of the current operator
+ * TODO: ask about the drawback
+ */
+function getOperatorShortName(operatorInfo: any, operatorId: number) {
+  const data = operatorInfo.data;
+  if (!data) return;
+  return data.ResultObject.Operators.find((op: IOperator) => +op.Id === operatorId)?.BrandName;
+}
 
 
 function ComplaintsChartsWrapper({ dataInfo, queryProps, subjectIDs, title }: IComplaintsChartsWrapperProps) {
   const [subjectId, setSubjectId] = useState<number>(-1);
-  const metadata = useSelector((state1: RootState) => state1.app.metadata);
 
+  /**
+   * TODO: ask the best practice
+   */
   const fetchDataHook = dataInfo === "complaint-count-rank" ? useComplaintCountRankQuery : useComplaintRankQuery;
   const data = fetchDataHook({ ...queryProps, subjectId });
+
+  const { fttxToken } = useSelector((state: RootState) => state.auth);
+  const operatorInfo = useGetBaseDataQuery(fttxToken);
+
 
   useEffect(() => {
     setSubjectId(subjectIDs[0]);
   }, [subjectIDs]);
 
+
   /**
    * this functionality should be replaced with an API call
    */
-  function getOperatorName(operatorId: number) {
-    const operator = metadata!.operators.find(item => item.id === operatorId);
-    const operatorName = operator ? operator.name : "";
-    return OPERATOR_MAP[operatorName];
-  }
+  // function getOperatorName(operatorId: number) {
+  //   const operator = metadata!.operators.find(item => item.id === operatorId);
+  //   const operatorName = operator ? operator.name : "";
+  //   return OPERATOR_MAP[operatorName];
+  // }
 
   return <>
     <Paper elevation={4}>
@@ -69,7 +83,7 @@ function ComplaintsChartsWrapper({ dataInfo, queryProps, subjectIDs, title }: IC
             return <Tab key={item} value={item}
                         label={
                           <Stack direction={"column"} justifyContent={"center"} alignItems={"center"}>
-                            <Typography><Topic /></Typography>
+                            <Typography><Topic sx={{ fontSize: "1.1rem" }} /></Typography>
                             <Typography sx={{ fontSize: "0.75rem" }}>موضوع {index + 1}</Typography>
                           </Stack>
                         } />;
@@ -88,7 +102,7 @@ function ComplaintsChartsWrapper({ dataInfo, queryProps, subjectIDs, title }: IC
             return (
               <g transform={`translate(${x},${y})`}>
                 <text x={0} y={0} dy={16} textAnchor="end" fill="#666" transform="rotate(-35)" fontSize={"0.7rem"}>
-                  {getOperatorName(payload.value)}
+                  {getOperatorShortName(operatorInfo, payload.value)}
                 </text>
               </g>
             );
@@ -98,7 +112,7 @@ function ComplaintsChartsWrapper({ dataInfo, queryProps, subjectIDs, title }: IC
             if (!active) return <></>;
             return <>
               <Paper sx={{ p: 2, "& tspan": { direction: "rtl !important" } }}>
-                <Typography sx={{ fontWeight: "500" }}>{getOperatorName(label)}</Typography>
+                <Typography sx={{ fontWeight: "500" }}>{getOperatorShortName(operatorInfo, label)}</Typography>
                 <Typography>مقدار شاخص: {payload && payload[0] ? payload[0].value : ""}</Typography>
               </Paper>
             </>;

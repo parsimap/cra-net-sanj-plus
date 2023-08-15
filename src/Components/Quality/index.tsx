@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 
 import { RootState } from "../../app/store";
 import { useOperatorStatusQueryWrapper } from "../../hooks/useOperatorStatusQueryWrapper";
-import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
 import { useArrayQueryResult } from "../../hooks/useArrayQueryResult";
 import { useAreaInfoQuery } from "../../features/craApiSlice";
 import { useReportTimeQuery } from "../../features/craHostServiceApiSlice";
@@ -15,12 +14,12 @@ import { Stack } from "@mui/material";
 
 function Quality() {
   const { serviceId, id: operatorId } = useSelector((state: RootState) => state.app.operator!);
-  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.app);
-  const token = useTokenQueryWrapper();
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
+  const token = useSelector((state: RootState) => state.auth.token);
+
   const areaInfo = useAreaInfoQuery({ lat, lng, zoom: 0, code: 1, apiKey: token });
   const status = useOperatorStatusQueryWrapper({ areaInfo, operatorId, serviceId });
   const { isDataReady, returnValue: reportTime } = useArrayQueryResult(useReportTimeQuery, {}, undefined);
-
 
   return <>
     <Stack direction={"column"} spacing={1}>

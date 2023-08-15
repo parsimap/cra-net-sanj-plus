@@ -1,11 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { IAuthSlice } from "../interfaces/IAuthSlice";
 
-type IState = {
-  token: string;
-};
 
-const initialState: IState = {
+const initialState: IAuthSlice = {
   token: "",
+  fttxToken: ""
 };
 
 const appSlice = createSlice({
@@ -15,8 +14,11 @@ const appSlice = createSlice({
     tokenChanged(state, action: PayloadAction<string>) {
       state.token = action.payload;
     },
-  },
+    fttxTokenChanged(state, action: PayloadAction<string>) {
+      state.fttxToken = action.payload;
+    }
+  }
 });
 
-export const { tokenChanged } = appSlice.actions;
+export const { tokenChanged, fttxTokenChanged } = appSlice.actions;
 export default appSlice.reducer;

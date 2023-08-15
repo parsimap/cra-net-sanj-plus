@@ -1,6 +1,6 @@
 export interface IChartData {
-  score: number,
+  score: string,
   name: string,
   ranking: number,
-  rank: number
+  rank: string
 }

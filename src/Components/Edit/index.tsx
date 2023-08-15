@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "../../app/store";
-import {
-  generationChanged,
-  userLocationCoordinatesChanged,
-  userOperatorChanged,
-  userServiceChanged
-} from "../../features/appSlice";
+import { currentTabChanged, generationChanged, userOperatorChanged, userServiceChanged } from "../../features/appSlice";
+import { userLocationCoordinatesChanged } from "../../features/mapViewSlice";
+
 
 import {
   Button,
@@ -27,14 +25,28 @@ import GeocodeAutocomplete from "../GeocodeAutocomplete/GeocodeAutocomplete";
 import { IEditProps } from "../../interfaces/IEditProps";
 import IGeocodePlace from "../../interfaces/IGeocodePlace";
 
+const searchedLocationInitialState: IGeocodePlace = {
+  area_id: "",
+  center: { lng: 0, lat: 0 },
+  end_location: { lng: 0, lat: 0 },
+  last_item_type: 0,
+  start_location: { lng: 0, lat: 0 },
+  title: "",
+  short_title: "",
+  postalCodeError: { accuracyRadius: 0 }
+};
 
-function Edit({ areaInfo, setEditMode, token }: IEditProps) {
+function Edit({ setEditMode, token }: IEditProps) {
   const {
     metadata,
-    operator,
-    userLocationCoordinates: { lng, lat },
-    mapZoom: zoom
+    operator
   } = useSelector((state: RootState) => state.app);
+  const {
+    userLocationCoordinates: { lng, lat }, mapZoom: zoom
+  } = useSelector((state: RootState) => state.mapView);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   /**
    * holds the ID of the selected service and operator for future uses
@@ -48,16 +60,7 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
   /**
    * the state that holds info of searched location
    */
-  const [searchedLocation, setSearchedLocation] = useState<IGeocodePlace | null>({
-    area_id: "",
-    center: { lng: 0, lat: 0 },
-    end_location: { lng: 0, lat: 0 },
-    last_item_type: 0,
-    start_location: { lng: 0, lat: 0 },
-    title: "",
-    short_title: "",
-    postalCodeError: { accuracyRadius: 0 }
-  });
+  const [searchedLocation, setSearchedLocation] = useState<IGeocodePlace>(searchedLocationInitialState);
 
 
   /**
@@ -65,6 +68,7 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
    */
   const operators = useMemo(getOperators, [metadata]);
 
+  // TODO : ask about the following functions
   /**
    * gets the unique operators from info stored in redux store
    */
@@ -94,11 +98,6 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
   function getService(id: number) {
     return metadata!.services.find(service => service.id === id);
   }
-
-
-  const dispatch = useDispatch();
-
-  //
 
   /**
    * handles the submit action by dispatching the changes in target service and operator
@@ -134,10 +133,23 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
       dispatch(generationChanged(serviceWithId?.type === "mobile" ? "4G" : undefined));
     }
 
+    function setPathName() {
+      navigate("/home");
+    }
+
+    function setTab() {
+      const serviceWithId = getService(info.serviceId);
+      const type = serviceWithId?.type;
+      if (type === "mobile") dispatch(currentTabChanged("Coverage"));
+      else dispatch(currentTabChanged("Quality"));
+    }
+
     setNewOperator();
     setNewService();
     setNewGeneration();
     setEditMode(false);
+    setPathName();
+    setTab();
   }
 
 
@@ -148,20 +160,16 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
         dispatch(userLocationCoordinatesChanged(newLocation.center));
       }
     }
-
   }
 
 
   return <>
     <Stack spacing={1}>
-
-      {/*<Paper elevation={4} sx={{ [`.${formLabelClasses.root}`]: { fontSize: "0.8rem" } }}>*/}
-      <GeocodeAutocomplete mapViewPort={{ lng, lat, zoom }} token={token} value={searchedLocation}
-                           onChange={handleLocationChange} />
-
-
-      {/*</Paper>*/}
-
+      <GeocodeAutocomplete
+        mapViewPort={{ lng, lat, zoom }}
+        token={token}
+        value={searchedLocation}
+        onChange={handleLocationChange} />
       <Paper elevation={4} sx={{ p: 1 }}>
         <Typography sx={{ mt: 1, mb: 1, fontWeight: "bold" }}>سرویس مورد نظر خود را انتخاب کنید.</Typography>
         <Divider />
@@ -184,8 +192,6 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
           </RadioGroup>
         </FormControl>
       </Paper>
-
-
       <Paper elevation={4} sx={{ p: 1 }}>
         <Typography sx={{ mt: 1, mb: 1, fontWeight: "bold" }}>اپراتور مورد نظر خود را انتخاب کنید.</Typography>
         <Divider />
@@ -204,17 +210,13 @@ function Edit({ areaInfo, setEditMode, token }: IEditProps) {
         </FormControl>
       </Paper>
     </Stack>
-
-
     <Button variant={"contained"}
             fullWidth={true}
             sx={{ position: "sticky", bottom: "-16px", left: 0, right: 0 }}
             onClick={submitHandler}>
-
       <Report />
       مشاهده گزارش
     </Button>
-
   </>;
 }
 

@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 
-import {
-  generationChanged,
-  metadataChanged,
-  userLocationCoordinatesChanged,
-  userOperatorChanged,
-  userServiceChanged
-} from "../../features/appSlice";
+import { generationChanged, metadataChanged, userOperatorChanged, userServiceChanged } from "../../features/appSlice";
 
 import VerifyUserInfo from "./Presenter";
+
 import { NETWORK_REQUEST_ERROR } from "../../common/networkRequestError";
 import { useOperatorListQuery } from "../../features/craHostServiceApiSlice";
 import { useOperatorInfoQuery } from "../../features/craHostApiSlice";
+import { fttxTokenChanged, tokenChanged } from "../../features/authSlice";
+import { useAppDispatch } from "../../app/hooks";
+import { userLocationCoordinatesChanged } from "../../features/mapViewSlice";
+
+
+import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
 
 import { IMetadata } from "../../interfaces/IMetadata";
 import { IService } from "../../interfaces/IService";
 import { IOperator } from "../../interfaces/IOperator";
 import { IProviderInfo } from "../../interfaces/IProviderInfo";
+import { useAuthenticationQuery } from "../../features/gisCraApiSlice";
 
 function VerifyUserInfoContainer() {
 
@@ -47,10 +48,25 @@ function VerifyUserInfoContainer() {
    */
   const [dataLoadingError, setDataLoadingError] = useState<string>("");
 
-
-  const dispatch = useDispatch();
-
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const token = useTokenQueryWrapper();
+
+  const fttxToken = useAuthenticationQuery({ passcode: process.env.REACT_APP_FTTX_PASSCODE ?? "" });
+
+  useEffect(() => {
+    dispatch(tokenChanged(token));
+  }, [dispatch, token]);
+
+
+  useEffect(() => {
+    const data = fttxToken.data;
+    if (data) {
+      dispatch(fttxTokenChanged(data.token));
+    }
+  }, [dispatch, fttxToken]);
+
 
   /**
    * this effect is responsible for tracking end users' live location
@@ -59,8 +75,6 @@ function VerifyUserInfoContainer() {
     const locationWatcherID = navigator.geolocation.watchPosition(onUserPermission, onUserDenial, {
       timeout: 5000
     });
-    // function effectCleanup() {
-    // }
 
     function onUserPermission(position: GeolocationPosition) {
       const { latitude: lat, longitude: lng } = position.coords;
@@ -75,7 +89,6 @@ function VerifyUserInfoContainer() {
 
     return () => {
       navigator.geolocation.clearWatch(locationWatcherID);
-
     };
 
 
@@ -83,7 +96,7 @@ function VerifyUserInfoContainer() {
 
 
   /**
-   * fetches data using RTK query. data is of type Imetadata
+   * fetches data using RTK query. data is of type IMetadata
    */
   const operatorsList = useOperatorListQuery({});
 

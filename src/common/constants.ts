@@ -1,4 +1,5 @@
 import { IOperatorCatalog } from "../interfaces/IOperatorCatelog";
+import { TCoverageColor } from "../types/TCoverageColor";
 
 /**
  * WARNING: this map should be replaced with an API call
@@ -34,3 +35,6 @@ export const OPERATOR_CATALOG: IOperatorCatalog[] = [
   { operatorId: 74, operatorCode: 5012, generation: "3G" },
   { operatorId: 74, operatorCode: 5013, generation: "4G" }
 ];
+
+
+export const COVERAGE_LAYER_STOPS: TCoverageColor[] = ["#FF0000", "#FFC300", "#008000", "#000000"];

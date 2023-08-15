@@ -2,96 +2,36 @@ import { useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
 
 
-import {
-  IComplaintDetailResultItem,
-  useComplaintCountQuery,
-  useLazyComplaintDetailQuery,
-  useReportTimeComplaintQuery
-} from "../../features/craHostServiceApiSlice";
+import { useComplaintCountQuery, useReportTimeComplaintQuery } from "../../features/craHostServiceApiSlice";
 import { useAreaInfoQuery } from "../../features/craApiSlice";
 import { RootState } from "../../app/store";
-import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
 import { useArrayQueryResult } from "../../hooks/useArrayQueryResult";
+import { useAppDispatch } from "../../app/hooks";
+import { provinceChanged } from "../../features/appSlice";
+import { complaintGeoJsonChanged } from "../../features/mapViewSlice";
 
 import { Button, Paper, Stack, Typography } from "@mui/material";
 import Calender from "@mui/icons-material/EventAvailableRounded";
+import AddFeedBack from "@mui/icons-material/AddCommentRounded";
 
 
 import TitleWithIcon from "../TitleWithIcon";
 import CommonComplaintsTable from "./CommonComplaintsTable";
 import ComplaintsChartsWrapper from "./ComplaintsChartsWrapper";
-import { useAppDispatch } from "../../app/hooks";
-import { provinceChanged } from "../../features/appSlice";
-import { FeatureCollection } from "geojson";
-import { complaintGeoJsonChanged } from "../../features/mapViewSlice";
-import { IOperator } from "../../interfaces/IOperator";
+
 import { IProvince } from "../../interfaces/IProvince";
 
+import { useComplaintsGeoJson } from "../../hooks/useComplaintsGeoJson";
 
-function getFeatureCollection(data: IComplaintDetailResultItem[], operatorId: number) {
-  const geoJson: FeatureCollection = {
-    type: "FeatureCollection",
-    features: []
-  };
-
-  for (const datum of data) {
-    const uniqueId = new Date().getTime();
-
-    geoJson.features.push({
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [datum.long, datum.lat]
-      },
-      properties: {
-        operatorId,
-        markerId: uniqueId,
-        date: datum.date,
-        // todo implement a way to figure out which the popup is created after fallback to web application
-        // complaintIsCreated,
-        service: datum.service,
-        type: datum.complaintType,
-        subject: datum.complaintSubject
-      }
-    });
-  }
-
-  return geoJson;
-}
-
-function useComplaintsGeoJson(province?: IProvince, operator?: IOperator | null): FeatureCollection {
-  const [trigger, { data }] = useLazyComplaintDetailQuery();
-
-  // console.log(operator, province, 'complaint');
-
-  useEffect(() => {
-    if (!province || !operator) {
-      return;
-    }
-
-    trigger({ provinceId: province.id, operatorId: String(operator.id) });
-  }, [province, operator, trigger]);
-
-
-  return useMemo(() => {
-    if (!data) {
-      return {
-        type: "FeatureCollection",
-        features: []
-      };
-    }
-
-    return getFeatureCollection(data, operator!.id);
-  }, [data, operator]);
-}
 
 function Complaints() {
   const {
     isDataReady: isReportTimeReady,
     returnValue: reportTime
   } = useArrayQueryResult(useReportTimeComplaintQuery, {}, undefined);
-  const { userLocationCoordinates: { lng, lat }, operator, province } = useSelector((state: RootState) => state.app);
-  const token = useTokenQueryWrapper();
+  const { operator, province } = useSelector((state: RootState) => state.app);
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
+  const token = useSelector((state: RootState) => state.auth.token);
   const areaInfo = useAreaInfoQuery({ lat, lng, zoom: 0, code: 1, apiKey: token });
   /**
    * queryProps is a common object between query params in `useComplaintCountQuery` and props of `ComplaintsChartsWrapper`
@@ -101,16 +41,17 @@ function Complaints() {
     serviceId: operator!.serviceId
   };
   const dispatch = useAppDispatch();
-  const newComplaintsGeoJson = useComplaintsGeoJson(province, operator);
+  const newComplaintsGeoJson = useComplaintsGeoJson({ province, operator });
   const complaints = useComplaintCountQuery({ ...queryProps, operatorId: operator!.id });
 
+  /**
+   * sets teh geoJson object in store to be added to the map
+   */
   useEffect(() => {
     dispatch(complaintGeoJsonChanged(newComplaintsGeoJson));
-
     return () => {
-      dispatch(complaintGeoJsonChanged({  type:'FeatureCollection', features: [] }));
-
-    }
+      dispatch(complaintGeoJsonChanged({ type: "FeatureCollection", features: [] }));
+    };
   }, [dispatch, newComplaintsGeoJson]);
 
   useEffect(() => {
@@ -152,7 +93,10 @@ function Complaints() {
                                queryProps={queryProps} />
 
     </Stack>
-    <Button sx={{ position: "sticky", bottom: "-16px" }} variant={"contained"} fullWidth={true}>ثبت شکایت</Button>
+    <Button sx={{ position: "sticky", bottom: "-16px" }} variant={"contained"} fullWidth={true}>
+      <AddFeedBack sx={{ fontSize: "1.3rem" }} />
+      ثبت شکایت
+    </Button>
   </>;
 }
 

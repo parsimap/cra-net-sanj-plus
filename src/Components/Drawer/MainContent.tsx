@@ -1,4 +1,5 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 import {
   Box,
@@ -16,30 +17,49 @@ import {
   typographyClasses
 } from "@mui/material";
 import Feedback from "@mui/icons-material/FeedbackRounded";
-
 import EditIcon from "@mui/icons-material/Edit";
 
 import { IDrawerProps } from "../../interfaces/IDrawerProps";
-import { OPERATOR_MAP } from "../../common/constants";
 
 import ProviderInfoWrapper from "../ProviderInfoWrapper";
+
+import { useAppDispatch } from "../../app/hooks";
+import { RootState } from "../../app/store";
+import { currentTabChanged } from "../../features/appSlice";
+import { useGetBaseDataQuery } from "../../features/fttxApiSlice";
 
 const FeedbackComponent = lazy(() => import("../Feedback"));
 
 function MainContent({
-                       currentTab,
-                       setCurrentTab,
                        tabs,
                        operator,
                        setEditMode,
                        service,
-                       areaInfo
+                       areaInfo,
+                       navigate
                      }: IDrawerProps) {
-
   /**
    * holds the state of feedback dialog
    */
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState<boolean>(false);
+
+  const dispatch = useAppDispatch();
+  const { currentTab } = useSelector((state: RootState) => state.app);
+  const { fttxToken } = useSelector((state: RootState) => state.auth);
+  const operatorInfo = useGetBaseDataQuery(fttxToken);
+
+
+  /**
+   * uses the operator info object to find the short name(brand name) of the current operator
+   */
+  function getOperatorShortName() {
+    const data = operatorInfo.data;
+    if (!data) return;
+    return data.ResultObject.Operators.find(op => +op.Id === (operator?.id ?? -1))?.BrandName;
+  }
+
+  const operatorBrandName = useMemo(getOperatorShortName, [operatorInfo, operator]);
+
 
   return (
     <>
@@ -58,10 +78,10 @@ function MainContent({
           spacing={1}
           sx={{
             borderRadius: "1rem",
-            p: 1,
+            p: 0.5,
             background: "rgba(109,189,113,.8784313725)",
             color: "#fff",
-            [`.${typographyClasses.root}`]: { fontSize: "0.75rem" }
+            [`.${typographyClasses.root}`]: { fontSize: "0.7rem" }
           }}
         >
           <Typography>{service ? service.name : ""}</Typography>
@@ -71,7 +91,7 @@ function MainContent({
             flexItem={true}
             color={"#fff"}
           />
-          <Typography>{operator ? OPERATOR_MAP[operator.name] : ""}</Typography>
+          <Typography>{operatorBrandName ?? ""}</Typography>
         </Stack>
         <Stack
           direction={"row"}
@@ -89,7 +109,10 @@ function MainContent({
             variant={"contained"}
             color={"info"}
             size={"small"}
-            onClick={() => setEditMode(true)}
+            onClick={() => {
+              setEditMode(true);
+              navigate("/home/edit");
+            }}
           >
             <EditIcon sx={{ fontSize: "0.8rem", mr: 0.5 }} />
             <Typography>ویرایش</Typography>
@@ -127,7 +150,7 @@ function MainContent({
           indicatorColor="primary"
           value={currentTab}
           onChange={(_, v) => {
-            setCurrentTab(v);
+            dispatch(currentTabChanged(v));
           }}
           sx={{
             mb: 2
@@ -155,9 +178,7 @@ function MainContent({
         <Suspense>
           <FeedbackComponent setFeedbackDialogOpen={setFeedbackDialogOpen} />
         </Suspense>
-
       </Dialog>
-
     </>
   );
 }

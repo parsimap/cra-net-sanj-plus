@@ -8,24 +8,24 @@ import ChartIcon from "@mui/icons-material/BarChartRounded";
 import TitleWithIcon from "../TitleWithIcon";
 
 import { useDriveTestAggDataQuery } from "../../features/craApiSlice";
-import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
 import { RootState } from "../../app/store";
 
 
-import { getOperatorCode } from "./coverage.common";
 import { QUALITY_MAP } from "./coverage.constants";
 import { IRegionInfo } from "../../interfaces/IRegionInfo";
 
 
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 
+import { getOperatorCode } from "../../common/getOperatorCode";
+
 function CoverageChartsRegional() {
-  const token = useTokenQueryWrapper();
+  const token = useSelector((state: RootState) => state.auth.token);
   const {
-    userLocationCoordinates: {
-      lat, lng
-    }, operator, generation
+    operator, generation
   } = useSelector((state: RootState) => state.app);
+  const { userLocationCoordinates: { lng, lat } } = useSelector((state: RootState) => state.mapView);
+
   const info = useDriveTestAggDataQuery({
     lat,
     lng,
@@ -87,7 +87,7 @@ function CoverageChartsRegional() {
             );
           }} />
           <YAxis hide={true} />
-          <Tooltip content={({ active, payload, label }) => {
+          <Tooltip  content={({ active, payload, label }) => {
             if (!active) return <></>;
             return <Paper sx={{ p: 1 }}>
               <Typography sx={{ fontSize: "0.85rem", fontWeight: 500 }}>{label}</Typography>
