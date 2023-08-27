@@ -15,7 +15,8 @@ const initialState: IAppSlice = {
   metadata: null,
   generation: undefined,
   province: undefined,
-  currentTab: "Quality"
+  currentTab: "Quality",
+  editMode: false
 };
 
 const appSlice = createSlice({
@@ -39,6 +40,9 @@ const appSlice = createSlice({
     },
     currentTabChanged: (state, action: PayloadAction<TTab>) => {
       state.currentTab = action.payload;
+    },
+    editModeChanged: (state, action: PayloadAction<boolean>) => {
+      state.editMode = action.payload;
     }
   }
 });
@@ -49,6 +53,7 @@ export const {
   metadataChanged,
   generationChanged,
   provinceChanged,
-  currentTabChanged
+  currentTabChanged,
+  editModeChanged
 } = appSlice.actions;
 export default appSlice.reducer;

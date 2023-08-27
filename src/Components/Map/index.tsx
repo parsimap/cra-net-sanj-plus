@@ -5,7 +5,7 @@ import { Map as MapboxMap } from "@parsimap/react-mapbox-gl";
 import mapboxgl, { GeoJSONSource, Marker } from "mapbox-gl";
 import { FeatureCollection } from "geojson";
 
-import { Backdrop, Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 
 import { userLocationCoordinatesChanged } from "../../features/mapViewSlice";
 import { RootState } from "../../app/store";
@@ -25,6 +25,7 @@ import { OPERATOR_CATALOG } from "../../common/constants";
 import LogoSection from "../LogoSection/LogoSection";
 import { ICoordinates } from "../../interfaces/ICoordinates";
 import { getOperatorCode } from "../../common/getOperatorCode";
+import LoadingSpinner from "../LoadingSpinner";
 
 /**
  * adds a single image to map component for further uses
@@ -39,7 +40,10 @@ async function addImage(url: string, map: mapboxgl.Map) {
         reject(error);
       }
 
-      map.addImage(imageName, result as ImageBitmap);
+      if (!map.hasImage(imageName)) {
+        map.addImage(imageName, result as ImageBitmap);
+      }
+
       resolve(undefined);
     });
   });
@@ -54,14 +58,26 @@ async function addComplaintsSourceAndFeatures(map: mapboxgl.Map, complaintGeoJso
   for (const markerUrl of MARKER_URLS) {
     await addImage(markerUrl, map);
   }
-  map.addSource("complaints", {
-    type: "geojson",
-    data: complaintGeoJson,
-    cluster: true,
-    clusterRadius: 50,
-    clusterMaxZoom: 15
-  });
-  COMPLAINTS_LAYERS.forEach(layer => map.addLayer(layer));
+
+  const source = map.getSource("complaints") as GeoJSONSource | undefined;
+
+  if (source) {
+    source.setData(complaintGeoJson);
+  } else {
+    map.addSource("complaints", {
+      type: "geojson",
+      data: complaintGeoJson,
+      cluster: true,
+      clusterRadius: 50,
+      clusterMaxZoom: 15
+    });
+  }
+
+  for (const layer of COMPLAINTS_LAYERS) {
+    if (!map.getLayer(layer.id)) {
+      map.addLayer(layer);
+    }
+  }
 }
 
 
@@ -222,10 +238,8 @@ function Map() {
   useEffect(() => {
     if (!map) return;
 
-    const source = map.getSource("complaints") as GeoJSONSource | undefined;
 
-    if (source) source.setData(complaintGeoJson);
-    else addComplaintsSourceAndFeatures(map, complaintGeoJson).then();
+    addComplaintsSourceAndFeatures(map, complaintGeoJson).then();
 
   }, [complaintGeoJson, map]);
 
@@ -349,9 +363,7 @@ function Map() {
             token={token}
           />
         )}
-        <Backdrop open={!isMapLoaded}>
-          <CircularProgress color={"inherit"} />
-        </Backdrop>
+        <LoadingSpinner open={!isMapLoaded} />
       </Box>
     </>
   )

@@ -27,9 +27,3 @@ export const QUALITY_MAP: { [index: string]: string } = {
 };
 
 
-export const legendMap = {
-  "#FF0000": "ضعیف",
-  "#FFC300": "متوسط",
-  "#008000": "خوب",
-  "#000000": "فاقد پوشش"
-};

@@ -13,10 +13,25 @@ export const captchaSlice = createApi({
       query: () => ({
         url: `/getcaptcha`
       })
+    }),
+    serviceFeedback: builder.query<{ status_code: number }, {
+      MizanRezayat: number,
+      Mobile: string,
+      Nazar: string,
+      captcha: string,
+      key: number
+    }>({
+      query: ({ MizanRezayat, Mobile, Nazar, captcha, key }) => ({
+        url: `/SanJeshRezaya/${key}/${captcha}`,
+        method: "POST",
+        body: JSON.stringify({
+          MizanRezayat, Mobile, Nazar
+        })
+      })
     })
   })
 });
 
 export const {
-  useLazyCaptchaQuery
+  useLazyCaptchaQuery, useLazyServiceFeedbackQuery
 } = captchaSlice;

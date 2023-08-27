@@ -9,13 +9,12 @@ import Save from "@mui/icons-material/SaveRounded";
 import Close from "@mui/icons-material/CloseRounded";
 import TextField from "@mui/material/TextField";
 
-import { useLazyCaptchaQuery } from "../../features/captchaSlice";
+import { useLazyCaptchaQuery, useLazyServiceFeedbackQuery } from "../../features/captchaSlice";
 
 import { IFeedbackForm } from "../../interfaces/IFeedbackForm";
 import { IFeedbackProps } from "../../interfaces/IFeedbackProps";
 
-// TODO : ask about the regex
-const phoneRegExp = /09([0-9][0-9]|3[1-9])[0-9]{7}/;
+const phoneRegExp = /^(|0)9(\d){9}$/;
 
 
 const validationSchema = yup.object({
@@ -34,12 +33,15 @@ const initialValues: IFeedbackForm = {
 };
 
 function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
-  const [trigger, { data }] = useLazyCaptchaQuery();
+  const [triggerCaptcha, { data }] = useLazyCaptchaQuery();
+  const [triggerServiceFeedback, { data: submitData }] = useLazyServiceFeedbackQuery();
 
   /**
    * this state hols the captcha information fetched from network
    */
   const [captcha, setCaptcha] = useState<{ url: string, key: number }>();
+
+  const [wrongCaptcha, setWrongCaptcha] = useState<boolean>(false);
 
   const formik = useFormik({
     initialValues,
@@ -49,8 +51,8 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
 
 
   useEffect(() => {
-    trigger({});
-  }, [trigger]);
+    triggerCaptcha({});
+  }, [triggerCaptcha]);
 
 
   /**
@@ -67,10 +69,34 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
   }, [data]);
 
 
-  function handleSubmit() { //TODO: ask about the submit
-    console.log(formik.values);
+  function handleSubmit() {
+    triggerServiceFeedback({
+      Nazar: formik.values.description,
+      key: captcha?.key ?? -1,
+      captcha: formik.values.captcha,
+      Mobile: formik.values.phone,
+      MizanRezayat: formik.values.rate
+    });
   }
 
+  useEffect(() => {
+    if (!submitData) return;
+
+    const { status_code } = submitData;
+
+    if (status_code === 101) {
+      setWrongCaptcha(true);
+    } else {
+      setFeedbackDialogOpen(false);
+    }
+
+  }, [setFeedbackDialogOpen, submitData]);
+
+  useEffect(() => {
+    if (wrongCaptcha) {
+      formik.setFieldError("captcha", "لطفا کد را به درستی وارد کنید.");
+    }
+  }, [wrongCaptcha]);
 
   return <>
     <Paper elevation={4} sx={{
@@ -126,7 +152,10 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
                          id={"captcha"}
                          name={"captcha"}
                          onBlur={formik.handleBlur}
-                         onChange={formik.handleChange}
+                         onChange={(e) => {
+                           setWrongCaptcha(false);
+                           formik.handleChange(e);
+                         }}
                          value={formik.values.captcha}
                          error={formik.touched.captcha && !!formik.errors.captcha}
                          helperText={formik.touched.captcha && formik.errors.captcha}
@@ -137,7 +166,7 @@ function Feedback({ setFeedbackDialogOpen }: IFeedbackProps) {
                                            src={captcha ? captcha.url : ""}></Typography>
                                <Typography component={"div"}>
                                  <Stack direction={"row"} alignItems={"center"} justifyContent={"center"}>
-                                   <IconButton onClick={() => trigger({})}>
+                                   <IconButton onClick={() => triggerCaptcha({})}>
                                      <Redo />
                                    </IconButton>
                                  </Stack>

@@ -1,5 +1,5 @@
-import React from "react";
+import { TSetState } from "../types/TSetState";
 
 export interface IFeedbackProps {
-  setFeedbackDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setFeedbackDialogOpen: TSetState<boolean>;
 }

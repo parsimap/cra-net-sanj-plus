@@ -1,7 +1,6 @@
-import { IProviderInfo } from "./IProviderInfo";
 import { NavigateFunction } from "react-router-dom";
 
-export interface IVerifyInfoPresenterProps extends IProviderInfo {
+export interface IVerifyInfoPresenterProps {
   isDataLoaded: boolean;
   loadingDataError: string;
   navigate: NavigateFunction;

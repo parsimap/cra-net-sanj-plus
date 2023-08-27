@@ -1,3 +1,7 @@
+/**
+general styles
+ */
+
 @import "~vazirmatn/misc/UI-Farsi-Digits/Vazirmatn-UI-FD-font-face.css";
 
 * {
@@ -40,6 +44,7 @@ tspan {
 /**
 styles for feedback textarea
  */
+
 textarea {
     padding: 8.5px 14px;
     border-radius: 4px;
@@ -65,6 +70,7 @@ textarea:focus {
 /**
 styles for datatable
  */
+
 .tss-1cdcmys-MUIDataTable-responsiveBase {
     position: unset !important;
 }
@@ -72,15 +78,18 @@ styles for datatable
 /**
 styles for map attribution
  */
+
 .mapboxgl-ctrl-bottom-right {
     left: 0;
     right: unset !important;
+    direction: ltr !important;
 }
 
 /**
 styles for complaints popup
  */
-.complaints-popup-wrapper{
+
+.complaints-popup-wrapper {
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
@@ -88,20 +97,20 @@ styles for complaints popup
     width: 200px;
 }
 
-.complaints-popup-grid-item{
+.complaints-popup-grid-item {
     display: grid;
     grid-template-columns: 30% 70%;
 }
 
-.complaints-popup-title{
+.complaints-popup-title {
     font-weight: 300;
 }
 
-.complaints-popup-content{
+.complaints-popup-content {
     font-weight: 600;
 }
 
-.complaints-popup-header{
+.complaints-popup-header {
     text-align: center;
     font-size: 1rem;
     margin-bottom: 1.2rem;
@@ -109,7 +118,7 @@ styles for complaints popup
 }
 
 
-.complaints-popup-header::after{
+.complaints-popup-header::after {
     content: '';
     position: absolute;
     left: 0;
@@ -120,7 +129,7 @@ styles for complaints popup
     z-index: -10;
 }
 
-.mapboxgl-popup-close-button{
+.mapboxgl-popup-close-button {
     font-size: 1rem;
     font-weight: 700;
     z-index: 11;
@@ -130,6 +139,7 @@ styles for complaints popup
 /**
 styles for marker
  */
+
 .search-result-marker {
     width: 25px;
     height: 39.5px;

@@ -5,17 +5,14 @@ import { RootState } from "../../app/store";
 
 import { PRICING_TABLE_COLUMN_MAP } from "./pricing.constants";
 
-import { Paper, Skeleton, tableHeadClasses } from "@mui/material";
-import Calendar from "@mui/icons-material/CalendarViewMonthRounded";
-import MUIDataTable from "mui-datatables";
-
 import { usePricingQuery } from "../../hooks/usePricingQuery";
 
-import TitleWithIcon from "../TitleWithIcon";
-
 import { IOptionedColumns } from "../../interfaces/IOptionedColumns";
+import { IPricingTable } from "../../interfaces/IPricingTable";
 
 import { getSortFunction } from "./pricing.util";
+
+import PricingTable from "./PricingTable/PricingTable";
 
 
 function Pricing() {
@@ -24,10 +21,7 @@ function Pricing() {
   /**
    * this state holds a table-friendly version of the `pricing` object fetched from network
    */
-  const [dataTableInfo, setDataTableInfo] = useState<{
-    tableColumns: IOptionedColumns[],
-    tableRows: string[][]
-  }>({ tableColumns: [], tableRows: [] });
+  const [dataTableInfo, setDataTableInfo] = useState<IPricingTable>({ tableColumns: [], tableRows: [] });
   const { isLoading, data: pricing } = usePricingQuery({ serviceType: service!.type as any });
 
 
@@ -75,43 +69,7 @@ function Pricing() {
   }, [pricing, isLoading]);
 
 
-  return <>
-    {dataTableInfo.tableRows.length !== 0 && dataTableInfo.tableColumns.length !== 0 ?
-      <Paper elevation={4} sx={{
-        p: 1,
-        [`.${tableHeadClasses.root}`]: { fontSize: "0.5rem" },
-        "& td, & th": {
-          padding: "0.5rem 0 !important",
-          fontSize: "11px",
-          textAlign: "center !important"
-        }
-      }}>
-        <TitleWithIcon text={" تعرفه اینترنت"} Icon={Calendar} spacing={0.5} />
-        <MUIDataTable
-          title={""}
-          data={dataTableInfo.tableRows}
-          columns={dataTableInfo.tableColumns}
-          components={{
-            TableToolbar: () => <></> // hides the toolbar container
-          }}
-          options={{
-            customFooter: () => <></>, // hides the pagination footer
-            customToolbar: () => <></>, // hides the ?
-            elevation: 0,
-            pagination: false,
-            print: false, // hides a toolbar item
-            download: false, // hides a toolbar item
-            search: false, // hides a toolbar item
-            filter: false, // hides a toolbar item
-            viewColumns: false, // hides a toolbar item
-            selectableRowsHideCheckboxes: true, // hides rows checkboxes,
-            responsive: "standard"
-          }}
-        />
-
-      </Paper> : <Skeleton variant={"rounded"} height={500} animation={"pulse"} />
-    }
-  </>;
+  return <PricingTable dataTableInfo={dataTableInfo} />;
 }
 
 export default Pricing;

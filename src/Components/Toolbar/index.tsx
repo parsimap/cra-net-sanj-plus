@@ -42,7 +42,6 @@ function Toolbar({ zoomHandlers: { handleZoomIn, handleZoomOut, getZoom }, mapRe
   function handleSelfLocation() {
 
     function errorCallback(error: GeolocationPositionError) {
-      console.log(error);
     }
 
     function successCallback(position: GeolocationPosition) {

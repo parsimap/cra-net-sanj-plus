@@ -1,11 +1,12 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { ComponentType, lazy, Suspense, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 import {
   Box,
   Button,
+  buttonBaseClasses,
   buttonClasses,
-  Dialog,
+  CircularProgress,
   Divider,
   Skeleton,
   Stack,
@@ -25,15 +26,17 @@ import ProviderInfoWrapper from "../ProviderInfoWrapper";
 
 import { useAppDispatch } from "../../app/hooks";
 import { RootState } from "../../app/store";
-import { currentTabChanged } from "../../features/appSlice";
+import { currentTabChanged, editModeChanged } from "../../features/appSlice";
 import { useGetBaseDataQuery } from "../../features/fttxApiSlice";
+import { useParams } from "react-router-dom";
+import { TTab } from "../../types/TTab";
 
 const FeedbackComponent = lazy(() => import("../Feedback"));
+const Dialog = lazy(() => import("@mui/material/Dialog")) as ComponentType<any>;
 
 function MainContent({
                        tabs,
                        operator,
-                       setEditMode,
                        service,
                        areaInfo,
                        navigate
@@ -47,7 +50,8 @@ function MainContent({
   const { currentTab } = useSelector((state: RootState) => state.app);
   const { fttxToken } = useSelector((state: RootState) => state.auth);
   const operatorInfo = useGetBaseDataQuery(fttxToken);
-
+  const operatorBrandName = useMemo(getOperatorShortName, [operatorInfo, operator]);
+  const params = useParams();
 
   /**
    * uses the operator info object to find the short name(brand name) of the current operator
@@ -58,7 +62,22 @@ function MainContent({
     return data.ResultObject.Operators.find(op => +op.Id === (operator?.id ?? -1))?.BrandName;
   }
 
-  const operatorBrandName = useMemo(getOperatorShortName, [operatorInfo, operator]);
+  /**
+   * changes mode in both path and store to `edit`
+   */
+  function editHandler() {
+    dispatch(editModeChanged(true));
+    navigate(`/edit/${params.operatorId}/${params.serviceId}`);
+  }
+
+  /**
+   * changes the current tab both in store and path
+   * @param value the new tab's name
+   */
+  function tabChangeHandler(value: string) {
+    navigate(`/home/${value.toLowerCase()}/${operator!.id}/${operator!.serviceId}`);
+    dispatch(currentTabChanged(value as TTab));
+  }
 
 
   return (
@@ -109,10 +128,7 @@ function MainContent({
             variant={"contained"}
             color={"info"}
             size={"small"}
-            onClick={() => {
-              setEditMode(true);
-              navigate("/home/edit");
-            }}
+            onClick={editHandler}
           >
             <EditIcon sx={{ fontSize: "0.8rem", mr: 0.5 }} />
             <Typography>ویرایش</Typography>
@@ -139,8 +155,12 @@ function MainContent({
       <Box
         sx={{
           [`.${tabsClasses.indicator}`]: { backgroundColor: "#43a047" },
-          [`.${tabClasses.textColorInherit}`]: {
-            color: "#43a047"
+          [`.${tabClasses.textColorInherit}`]: { color: "#43a047" },
+          [`.${buttonBaseClasses.root}`]: { p: "12px" },
+          [`.${tabClasses.selected} .${typographyClasses.root}`]: {
+            fontWeight: 800,
+            fontSize: "0.9rem",
+            transition: "0.3s"
           }
         }}
       >
@@ -149,9 +169,7 @@ function MainContent({
           textColor="inherit"
           indicatorColor="primary"
           value={currentTab}
-          onChange={(_, v) => {
-            dispatch(currentTabChanged(v));
-          }}
+          onChange={(_, v) => tabChangeHandler(v)}
           sx={{
             mb: 2
           }}
@@ -174,11 +192,11 @@ function MainContent({
         <ProviderInfoWrapper state={currentTab} />
       </Box>
 
-      <Dialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)}>
-        <Suspense>
+      <Suspense fallback={<CircularProgress />}>
+        <Dialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)}>
           <FeedbackComponent setFeedbackDialogOpen={setFeedbackDialogOpen} />
-        </Suspense>
-      </Dialog>
+        </Dialog>
+      </Suspense>
     </>
   );
 }

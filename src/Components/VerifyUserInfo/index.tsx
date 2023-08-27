@@ -1,42 +1,21 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import { generationChanged, metadataChanged, userOperatorChanged, userServiceChanged } from "../../features/appSlice";
+import { generationChanged, userOperatorChanged, userServiceChanged } from "../../features/appSlice";
+import { useOperatorInfoQuery } from "../../features/craHostApiSlice";
+import { useAppDispatch } from "../../app/hooks";
+import { RootState } from "../../app/store";
+
 
 import VerifyUserInfo from "./Presenter";
 
 import { NETWORK_REQUEST_ERROR } from "../../common/networkRequestError";
-import { useOperatorListQuery } from "../../features/craHostServiceApiSlice";
-import { useOperatorInfoQuery } from "../../features/craHostApiSlice";
-import { fttxTokenChanged, tokenChanged } from "../../features/authSlice";
-import { useAppDispatch } from "../../app/hooks";
-import { userLocationCoordinatesChanged } from "../../features/mapViewSlice";
-
-
-import { useTokenQueryWrapper } from "../../hooks/useTokenQueryWrapper";
-
-import { IMetadata } from "../../interfaces/IMetadata";
 import { IService } from "../../interfaces/IService";
 import { IOperator } from "../../interfaces/IOperator";
-import { IProviderInfo } from "../../interfaces/IProviderInfo";
-import { useAuthenticationQuery } from "../../features/gisCraApiSlice";
 
 function VerifyUserInfoContainer() {
-
-  /**
-   * holds information of all available services and operators
-   */
-  const [metadata, setMetaData] = useState<IMetadata>({
-    operators: [], services: []
-  });
-
-  /**
-   * holds information of the operator and service of end user
-   */
-  const [providerInfo, setProviderInfo] = useState<IProviderInfo>({
-    serviceName: "نامشخص",
-    operatorName: "نامشخص"
-  });
+  const { metadata } = useSelector((state: RootState) => state.app);
 
   /**
    * keeps track of data loading state; if data is not loaded fallback component is shown
@@ -50,71 +29,6 @@ function VerifyUserInfoContainer() {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  const token = useTokenQueryWrapper();
-
-  const fttxToken = useAuthenticationQuery({ passcode: process.env.REACT_APP_FTTX_PASSCODE ?? "" });
-
-  useEffect(() => {
-    dispatch(tokenChanged(token));
-  }, [dispatch, token]);
-
-
-  useEffect(() => {
-    const data = fttxToken.data;
-    if (data) {
-      dispatch(fttxTokenChanged(data.token));
-    }
-  }, [dispatch, fttxToken]);
-
-
-  /**
-   * this effect is responsible for tracking end users' live location
-   */
-  useEffect(() => {
-    const locationWatcherID = navigator.geolocation.watchPosition(onUserPermission, onUserDenial, {
-      timeout: 5000
-    });
-
-    function onUserPermission(position: GeolocationPosition) {
-      const { latitude: lat, longitude: lng } = position.coords;
-      const lngLat = { lng, lat };
-      dispatch(userLocationCoordinatesChanged(lngLat));
-    }
-
-    function onUserDenial(err: GeolocationPositionError) {
-      // err.
-    }
-
-
-    return () => {
-      navigator.geolocation.clearWatch(locationWatcherID);
-    };
-
-
-  }, [dispatch]);
-
-
-  /**
-   * fetches data using RTK query. data is of type IMetadata
-   */
-  const operatorsList = useOperatorListQuery({});
-
-  /**
-   * this effect handles `operatorsList` changes
-   */
-  useEffect(() => {
-    if (operatorsList.isError) {
-      handleNetworkError();
-      return;
-    }
-
-    const data = operatorsList.data;
-    if (data) {
-      setMetaData(data);
-      dispatch(metadataChanged(data));
-    }
-  }, [dispatch, operatorsList]);
 
   /**
    * fetches data using RTK query. data contains operatorId and serviceId
@@ -139,29 +53,23 @@ function VerifyUserInfoContainer() {
       }
 
       function getCurrentService(serviceId: number) {
-        return metadata.services.find(service => serviceId === service.id)!;
+        return metadata!.services.find(service => serviceId === service.id)!;
       }
 
       function getCurrentOperator(operatorId: number) {
-        return metadata.operators.find(operator => operator.id === operatorId)!;
+        return metadata!.operators.find(operator => operator.id === operatorId)!;
       }
 
       const isMetaDataLoaded = isMetadataLoaded();
 
 
-      const NO_INFO = "نامشخص";
-
       const currentService: IService | null = isMetaDataLoaded ? getCurrentService(result.serviceId) : null;
       const currentOperator: IOperator | null = isMetaDataLoaded ? getCurrentOperator(result.operatorId) : null;
-
-      const currentServiceName = currentService ? currentService.name : NO_INFO;
-      const currentOperatorName = currentOperator ? currentOperator.name : NO_INFO;
 
 
       if (isMetaDataLoaded || !!dataLoadingError)
         setIsDataLoaded(true);
 
-      setProviderInfo({ serviceName: currentServiceName, operatorName: currentOperatorName });
 
       dispatch(userServiceChanged(currentService ?? { type: "", name: "", id: -1 }));
       dispatch(userOperatorChanged(currentOperator ?? { name: "", id: -1, serviceId: -1, provinceId: -1 }));
@@ -190,8 +98,7 @@ function VerifyUserInfoContainer() {
   }
 
 
-  return <VerifyUserInfo operatorName={providerInfo.operatorName} serviceName={providerInfo.serviceName}
-                         isDataLoaded={isDataLoaded} loadingDataError={dataLoadingError} navigate={navigate} />;
+  return <VerifyUserInfo isDataLoaded={isDataLoaded} loadingDataError={dataLoadingError} navigate={navigate} />;
 }
 
 export default VerifyUserInfoContainer;

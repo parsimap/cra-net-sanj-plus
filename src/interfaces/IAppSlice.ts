@@ -11,5 +11,6 @@ export interface IAppSlice {
   metadata: null | IMetadata,
   generation: undefined | TGeneration,
   province?: IProvince,
-  currentTab:TTab
+  currentTab: TTab,
+  editMode: boolean
 }

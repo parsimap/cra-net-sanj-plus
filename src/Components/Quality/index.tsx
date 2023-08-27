@@ -7,8 +7,8 @@ import { useArrayQueryResult } from "../../hooks/useArrayQueryResult";
 import { useAreaInfoQuery } from "../../features/craApiSlice";
 import { useReportTimeQuery } from "../../features/craHostServiceApiSlice";
 
-import GroupQualityChart from "./GroupQualityChart";
-import GroupQualityTable from "./GroupQualityTable";
+import QualityChartWrapper from "./QualityChartWrapper/QualityChartWrapper";
+import QualityTableWrapper from "./QualityTableWrapper/QualityTableWrapper";
 
 import { Stack } from "@mui/material";
 
@@ -23,10 +23,10 @@ function Quality() {
 
   return <>
     <Stack direction={"column"} spacing={1}>
-      <GroupQualityTable operatorStatus={{ data: status.data!, status: status.status }}
-                         reportTime={isDataReady ? reportTime[0].reportTime : ""} />
-      <GroupQualityChart serviceId={serviceId}
-                         provinceId={areaInfo.data?.result ? areaInfo.data?.result[0].code : ""} />
+      <QualityTableWrapper operatorStatus={{ data: status.data!, status: status.status }}
+                           reportTime={isDataReady ? reportTime[0].reportTime : ""} />
+      <QualityChartWrapper serviceId={serviceId}
+                           provinceId={areaInfo.data?.result ? areaInfo.data?.result[0].code : ""} />
     </Stack>
 
   </>;

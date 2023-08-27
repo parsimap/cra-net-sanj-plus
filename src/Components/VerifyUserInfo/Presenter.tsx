@@ -1,27 +1,40 @@
-import {
-  Alert,
-  Backdrop,
-  Button,
-  CircularProgress,
-  Paper,
-  Snackbar,
-  Stack,
-  Typography,
-  typographyClasses
-} from "@mui/material";
+import { Alert, Button, Paper, Snackbar, Stack, Typography, typographyClasses } from "@mui/material";
 import Edit from "@mui/icons-material/EditNoteRounded";
 import Confirm from "@mui/icons-material/BeenhereRounded";
 
 import { IVerifyInfoPresenterProps } from "../../interfaces/IVerifyInfoPresenterProps";
+import { useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import LoadingSpinner from "../LoadingSpinner";
+import { currentTabChanged } from "../../features/appSlice";
+import { useAppDispatch } from "../../app/hooks";
 
 
 function VerifyUserInfo({
-                          operatorName,
-                          serviceName,
                           isDataLoaded,
                           loadingDataError,
                           navigate
                         }: IVerifyInfoPresenterProps) {
+  const { operator, service } = useSelector((state: RootState) => state.app);
+  const dispatch = useAppDispatch();
+
+
+  /**
+   * changes the current tab both in store and path
+   */
+  function submitHandler() {
+    const tab = service!.type === "mobile" ? "Coverage" : "Quality";
+    dispatch(currentTabChanged(tab));
+    navigate(`/home/${tab.toLowerCase()}/${operator!.id}/${operator!.serviceId}`);
+  }
+
+  /**
+   * sets the edit mode in path
+   */
+  function editHandler() {
+    navigate(`/edit/${operator!.id}/${operator!.serviceId}`);
+  }
+
   return <>
     {isDataLoaded ?
       <Stack justifyContent={"center"} alignItems={"center"} sx={{ height: "100vh", backgroundColor: "#f3f3f3" }}>
@@ -33,10 +46,10 @@ function VerifyUserInfo({
             <Stack direction={"row"} alignItems={"center"} sx={{ p: 2 }} spacing={2}>
               <Stack spacing={2} sx={{ [`.${typographyClasses.root}`]: { fontSize: "0.9rem" } }}>
                 <Typography>
-                  سرویس {serviceName}
+                  سرویس {service!.name}
                 </Typography>
                 <Typography>
-                  اپراتور {operatorName}
+                  اپراتور {operator!.name}
                 </Typography>
               </Stack>
               <Typography component={"div"} sx={{
@@ -51,11 +64,14 @@ function VerifyUserInfo({
             </Stack>
             <Stack direction={"column"} spacing={2} sx={{ p: 2 }}>
               <Stack direction={"row"} justifyContent={"space-around"}>
-                <Button onClick={() => navigate("/home")} variant={"contained"}>
+                <Button onClick={submitHandler}
+                        variant={"contained"}>
                   <Confirm sx={{ fontSize: "1.2rem" }} />
                   تایید و ادامه
                 </Button>
-                <Button onClick={() => navigate("/home/edit")} variant={"outlined"}>
+                <Button
+                  onClick={editHandler}
+                  variant={"outlined"}>
                   <Edit />
                   ویرایش
                 </Button>
@@ -68,8 +84,9 @@ function VerifyUserInfo({
             </Stack>
           </Stack>
         </Paper>
-      </Stack> : <Backdrop open={true} sx={{ zIndex: 100000 }}> <CircularProgress color="inherit" />
-      </Backdrop>}
+      </Stack> :
+      <LoadingSpinner open={true} />
+    }
 
     {
       loadingDataError && <Snackbar open={!!loadingDataError}>
